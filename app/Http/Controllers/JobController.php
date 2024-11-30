@@ -4,20 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Models\Job;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class JobController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
     public function index()
     {
         return Job::with('employer')->latest()->paginate(perPage: 3);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
     public function store(Request $request)
     {
 
@@ -35,19 +30,15 @@ class JobController extends Controller
         return redirect('/jobs');
     }
 
-    /**
-     * Display the specified resource.
-     */
     public function show(Job $job)
     {
         return $job;
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
     public function update(Job $job)
     {
+        Gate::authorize('edit-job', $job);
+
         request()->validate([
             'title' => ['required', 'min:3'],
             'salary' => ['required'],
@@ -61,11 +52,11 @@ class JobController extends Controller
         return redirect("/jobs");
     }
 
-    /**
-     * Remove the specified resource from storage.
-     */
     public function destroy(Job $job)
     {
+
+        Gate::authorize('edit-job', $job);
+
         $job->delete();
 
         return redirect("/jobs");
